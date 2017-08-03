@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "976293499314",
+    "firebase_url": "https://alfirebaseproject-fb640.firebaseio.com",
+    "project_id": "alfirebaseproject-fb640",
+    "storage_bucket": "alfirebaseproject-fb640.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:976293499314:android:b0959c795d111740",
+        "android_client_info": {
+          "package_name": "tk.samgrogan.al"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "976293499314-36rpt9j5o73fubiu95e2mhpba56ac5jr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "tk.samgrogan.al",
+            "certificate_hash": "d29dbd137ff48270ad4e13b8e090a7a4bf8fd95e"
+          }
+        },
+        {
+          "client_id": "976293499314-rlomjeepbninvorprubcneulb093uc8c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIpB3cqYz9gGg9XZRtPqJLwrS9LTcTSsE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "976293499314-rlomjeepbninvorprubcneulb093uc8c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
