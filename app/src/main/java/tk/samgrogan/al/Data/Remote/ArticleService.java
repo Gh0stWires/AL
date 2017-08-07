@@ -10,6 +10,6 @@ import tk.samgrogan.al.Data.NewsResponse;
 
 public interface ArticleService {
 
-    @GET("/articles?apiKey=ef3566796356478d9f2e17c8628077f0&source=google-news&sortBy=top")
+    @GET("articles?apiKey=ef3566796356478d9f2e17c8628077f0&source=google-news&sortBy=top")
     Call<NewsResponse> getArticles();
 }

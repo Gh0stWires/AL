@@ -8,7 +8,7 @@ import tk.samgrogan.al.Data.Remote.RetrofitClient;
  */
 
 public class ApiUtil {
-    public static final String BASE_URL = " https://newsapi.org/v1";
+    public static final String BASE_URL = "https://newsapi.org/v1/";
 
     public static ArticleService getArticleService(){
         return RetrofitClient.getClient(BASE_URL).create(ArticleService.class);

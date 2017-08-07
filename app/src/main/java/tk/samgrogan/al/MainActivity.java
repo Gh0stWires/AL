@@ -3,6 +3,8 @@ package tk.samgrogan.al;
 import android.app.Activity;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,7 +17,17 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import tk.samgrogan.al.Adapters.ArticleAdapter;
+import tk.samgrogan.al.Data.ArticlesModel;
+import tk.samgrogan.al.Data.NewsResponse;
+import tk.samgrogan.al.Data.Remote.ArticleService;
+import tk.samgrogan.al.Utils.ApiUtil;
 
 /**
  * Skeleton of an Android Things activity.
@@ -43,6 +55,8 @@ public class MainActivity extends Activity {
     private DatabaseReference reference;
     private FirebaseAuth auth;
     private TextToSpeech tts;
+    private ArticleAdapter mAdapter;
+    private ArticleService service;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +98,13 @@ public class MainActivity extends Activity {
             }
         });
 
+        service = ApiUtil.getArticleService();
         display = (TextView) findViewById(R.id.body_text);
+        mAdapter = new ArticleAdapter(new ArrayList<ArticlesModel>(), getApplicationContext());
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.article_list);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(mAdapter);
         auth = FirebaseAuth.getInstance();
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         reference = database.getReference().child("users").child(auth.getCurrentUser().getUid()).child("commands");
@@ -97,7 +117,7 @@ public class MainActivity extends Activity {
                 if (!command.getmUserCommand().equals("Ready for next command")) {
                     System.out.println(command.getmUserCommand());
                     display.setText(command.getmUserCommand());
-                    TcpClient client = new TcpClient("ip goes here", 5000, command.getmUserCommand().toString());
+                    TcpClient client = new TcpClient("192.168.0.21", 5000, command.getmUserCommand().toString());
                     client.execute();
                     speak(command.getmUserCommand());
                 }
@@ -108,12 +128,31 @@ public class MainActivity extends Activity {
                 System.out.println("The read failed: " + databaseError.getCode());
             }
         });
+
+        loadArticles();
     }
 
 
 
     private void displayChatMessages() {
 
+    }
+
+    public void loadArticles(){
+        service.getArticles().enqueue(new Callback<NewsResponse>() {
+            @Override
+            public void onResponse(Call<NewsResponse> call, Response<NewsResponse> response) {
+                if (response.isSuccessful()){
+                    mAdapter.updateAnswers(response.body().getArticles());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<NewsResponse> call, Throwable t) {
+                Log.d("IDK", "Shits broke");
+
+            }
+        });
     }
 
     private void speak(String text){
