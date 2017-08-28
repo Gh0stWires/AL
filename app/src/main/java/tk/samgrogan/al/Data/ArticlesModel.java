@@ -1,5 +1,8 @@
 package tk.samgrogan.al.Data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -7,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
  * Created by ghost on 8/1/2017.
  */
 
-public class ArticlesModel {
+public class ArticlesModel implements Parcelable {
 
     @SerializedName("author")
     @Expose
@@ -27,6 +30,27 @@ public class ArticlesModel {
     @SerializedName("publishedAt")
     @Expose
     private String publishedAt;
+
+    protected ArticlesModel(Parcel in) {
+        author = in.readString();
+        title = in.readString();
+        description = in.readString();
+        url = in.readString();
+        urlToImage = in.readString();
+        publishedAt = in.readString();
+    }
+
+    public static final Creator<ArticlesModel> CREATOR = new Creator<ArticlesModel>() {
+        @Override
+        public ArticlesModel createFromParcel(Parcel in) {
+            return new ArticlesModel(in);
+        }
+
+        @Override
+        public ArticlesModel[] newArray(int size) {
+            return new ArticlesModel[size];
+        }
+    };
 
     public String getAuthor() {
         return author;
@@ -76,5 +100,19 @@ public class ArticlesModel {
         this.publishedAt = publishedAt;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(author);
+        dest.writeString(title);
+        dest.writeString(description);
+        dest.writeString(url);
+        dest.writeString(urlToImage);
+        dest.writeString(publishedAt);
+    }
 }
 

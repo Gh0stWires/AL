@@ -42,7 +42,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
     public void onBindViewHolder(ArticleViewHolder holder, int position) {
         holder.title.setText(articles.get(position).getTitle());
         //holder.imageView.setImageResource(R.drawable.test);
-        Picasso.with(mContext).load(articles.get(position).getUrlToImage()).resize(320, 320).centerCrop().into(holder.imageView);
+        Picasso.with(mContext).load(articles.get(position).getUrlToImage()).resize(520, 520).centerCrop().into(holder.imageView);
     }
 
     @Override

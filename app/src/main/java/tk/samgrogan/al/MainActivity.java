@@ -1,13 +1,21 @@
 package tk.samgrogan.al;
 
-import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,6 +35,7 @@ import tk.samgrogan.al.Adapters.ArticleAdapter;
 import tk.samgrogan.al.Data.ArticlesModel;
 import tk.samgrogan.al.Data.NewsResponse;
 import tk.samgrogan.al.Data.Remote.ArticleService;
+import tk.samgrogan.al.Services.ArticleIntentService;
 import tk.samgrogan.al.Utils.ApiUtil;
 
 /**
@@ -48,7 +57,7 @@ import tk.samgrogan.al.Utils.ApiUtil;
  *
  * @see <a href="https://github.com/androidthings/contrib-drivers#readme">https://github.com/androidthings/contrib-drivers#readme</a>
  */
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
     private static final int SIGN_IN_REQUEST_CODE = 123;
     private TextView display;
@@ -57,31 +66,19 @@ public class MainActivity extends Activity {
     private TextToSpeech tts;
     private ArticleAdapter mAdapter;
     private ArticleService service;
+    private ArticleReceiver receiver;
+    private AlarmManager alarmManager;
+    private PendingIntent articleIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
 
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            // Start sign in/sign up activity
-            startActivityForResult(
-                    AuthUI.getInstance()
-                            .createSignInIntentBuilder()
-                            .build(),
-                    SIGN_IN_REQUEST_CODE
-            );
-        } else {
-            // User is already signed in. Therefore, display
-            // a welcome Toast
-            Toast.makeText(this,
-                    "Welcome " + FirebaseAuth.getInstance()
-                            .getCurrentUser()
-                            .getDisplayName(),
-                    Toast.LENGTH_LONG)
-                    .show();
+        auth = FirebaseAuth.getInstance();
 
-        }
         tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -99,15 +96,35 @@ public class MainActivity extends Activity {
         });
 
         service = ApiUtil.getArticleService();
-        display = (TextView) findViewById(R.id.body_text);
+        IntentFilter filter = new IntentFilter(ArticleReceiver.ACTION_RESP);
+        receiver = new ArticleReceiver();
+        registerReceiver(receiver, filter);
+
+        alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent article = new Intent(getApplicationContext(), AlarmManagerReceiver.class);
+        articleIntent = PendingIntent.getBroadcast(getApplicationContext(),0, article, 0);
+        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_FIFTEEN_MINUTES, AlarmManager.INTERVAL_FIFTEEN_MINUTES, articleIntent);
+
+
+        //display = (TextView) findViewById(R.id.body_text);
         mAdapter = new ArticleAdapter(new ArrayList<ArticlesModel>(), getApplicationContext());
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.article_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(mAdapter);
-        auth = FirebaseAuth.getInstance();
+
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
-        reference = database.getReference().child("users").child(auth.getCurrentUser().getUid()).child("commands");
+        if(auth.getCurrentUser() != null) {
+            reference = database.getReference().child("users").child(auth.getCurrentUser().getUid()).child("commands");
+        }else {
+            startActivityForResult(
+                    AuthUI.getInstance()
+                            .createSignInIntentBuilder()
+                            .build(),
+                    SIGN_IN_REQUEST_CODE
+            );
+            reference = database.getReference().child("users").child(auth.getCurrentUser().getUid()).child("commands");
+        }
 
         reference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -116,8 +133,8 @@ public class MainActivity extends Activity {
                 CommandModel command = dataSnapshot.getValue(CommandModel.class);
                 if (!command.getmUserCommand().equals("Ready for next command")) {
                     System.out.println(command.getmUserCommand());
-                    display.setText(command.getmUserCommand());
-                    TcpClient client = new TcpClient("192.168.0.21", 5000, command.getmUserCommand().toString());
+                    //display.setText(command.getmUserCommand());
+                    TcpClient client = new TcpClient("192.168.0.3", 5000, command.getmUserCommand().toString());
                     client.execute();
                     speak(command.getmUserCommand());
                 }
@@ -157,6 +174,30 @@ public class MainActivity extends Activity {
 
     private void speak(String text){
         tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+    }
+
+    public class ArticleReceiver extends BroadcastReceiver {
+        public static final String ACTION_RESP = "tk.samgrogan.intent.action.MESSAGE_PROCESSED";
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            mAdapter.updateAnswers(intent.<ArticlesModel>getParcelableArrayListExtra(ArticleIntentService.LIST_MSG));
+
+        }
+    }
+
+    public class AlarmManagerReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Intent service = new Intent(context, ArticleIntentService.class);
+            context.startService(service);
+        }
+    }
+
+    public void getPsyched(View view){
+        Intent intent = new Intent(getApplicationContext(), GetPsyched.class);
+        startActivity(intent);
     }
 
 

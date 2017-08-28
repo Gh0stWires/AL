@@ -1,29 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fitsSystemWindows="true"
     android:background="@drawable/test"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" tools:context="tk.samgrogan.al.MainActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="tk.samgrogan.al.MainActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/my_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        app:title="Outer Heaven"
+        app:titleMarginStart="40dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
 
 
     <android.support.v7.widget.RecyclerView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:divider="@android:color/transparent"
         android:dividerHeight="8dp"
-        android:layout_marginStart="70dp"
         android:background="@color/fui_transparent"
-        android:id="@+id/article_list">
+        android:id="@+id/article_list"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_marginStart="28dp">
 
     </android.support.v7.widget.RecyclerView>
 
-    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:text="Hello World!" app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent" app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:id="@+id/body_text"/>
+
+
+        <ImageButton
+            android:layout_width="94dp"
+            android:layout_height="89dp"
+            android:src="@drawable/wolf"
+            android:id="@+id/imageButton"
+            app:layout_constraintTop_toTopOf="@+id/article_list"
+            app:layout_constraintStart_toEndOf="@+id/article_list"
+            android:layout_marginTop="8dp"
+            android:onClick="getPsyched"
+            android:layout_marginStart="204dp" />
+
 
 </android.support.constraint.ConstraintLayout>
